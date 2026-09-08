@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface StockControlProps {
   stock: number
@@ -8,20 +8,48 @@ interface StockControlProps {
 }
 
 export default function StockControl({ stock, onChange }: StockControlProps) {
+  const [localStock, setLocalStock] = useState(stock)
   const [inputValue, setInputValue] = useState(stock.toString())
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Update local state when parent prop changes, only if we are not actively debouncing
   useEffect(() => {
-    setInputValue(stock.toString())
+    if (!timeoutRef.current) {
+      setLocalStock(stock)
+      setInputValue(stock.toString())
+    }
   }, [stock])
 
+  // Clear timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
+
+  const triggerChange = (newStock: number) => {
+    setLocalStock(newStock)
+    setInputValue(newStock.toString())
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+
+    // Delay the actual parent update by 3 seconds
+    timeoutRef.current = setTimeout(() => {
+      onChange(newStock)
+      timeoutRef.current = null
+    }, 3000)
+  }
+
   const handleMinus = () => {
-    if (stock > 0) {
-      onChange(stock - 1)
+    if (localStock > 0) {
+      triggerChange(localStock - 1)
     }
   }
 
   const handlePlus = () => {
-    onChange(stock + 1)
+    triggerChange(localStock + 1)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,11 +59,11 @@ export default function StockControl({ stock, onChange }: StockControlProps) {
   const handleInputBlur = () => {
     const val = parseInt(inputValue, 10)
     if (!isNaN(val) && val >= 0) {
-      if (val !== stock) {
-        onChange(val)
+      if (val !== localStock) {
+        triggerChange(val)
       }
     } else {
-      setInputValue(stock.toString()) // reset
+      setInputValue(localStock.toString()) // reset invalid input
     }
   }
 
@@ -49,13 +77,13 @@ export default function StockControl({ stock, onChange }: StockControlProps) {
     <div className="flex items-center space-x-1" onClick={e => e.stopPropagation()}>
       <button 
         onClick={handleMinus}
-        disabled={stock <= 0}
+        disabled={localStock <= 0}
         className="w-8 h-8 rounded-l bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-bold text-gray-700 transition-colors"
       >
         −
       </button>
       <input
-        type="text" // using text to avoid browser spin buttons
+        type="text" 
         inputMode="numeric"
         pattern="[0-9]*"
         value={inputValue}
