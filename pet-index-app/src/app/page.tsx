@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Pet, PetInsert, PetUpdate } from '@/types/pet'
+import { MOCK_PETS } from '@/lib/mockPets'
 import PetCard from '@/components/PetCard'
 import PetModal from '@/components/PetModal'
 import { Plus, Search } from 'lucide-react'
@@ -13,6 +14,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('All')
+  const [useMock, setUseMock] = useState(false)
   
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingPet, setEditingPet] = useState<Pet | undefined>(undefined)
@@ -30,15 +32,31 @@ export default function Home() {
       .order('biome_level', { ascending: true })
       .order('name', { ascending: true })
     
-    if (error) {
-      toast.error('Failed to fetch pets: ' + error.message)
+    if (error || !data || data.length === 0) {
+      if (error) console.warn('Supabase error, using mock data:', error.message)
+      // Fallback ke mock data jika Supabase belum di-setup atau kosong
+      setPets(MOCK_PETS)
+      setUseMock(true)
     } else {
-      setPets(data || [])
+      setPets(data)
+      setUseMock(false)
     }
     setLoading(false)
   }
 
   const handleSavePet = async (petData: PetInsert | PetUpdate) => {
+    if (useMock) {
+      // Mock mode: update local state only
+      if (editingPet) {
+        setPets(prev => prev.map(p => p.id === editingPet.id ? { ...p, ...petData } : p))
+        toast.success('Pet updated! (mode mock — belum tersambung Supabase)')
+      } else {
+        const newPet: Pet = { id: `mock-${Date.now()}`, created_at: '', updated_at: '', ...(petData as PetInsert) }
+        setPets(prev => [...prev, newPet])
+        toast.success('Pet added! (mode mock — belum tersambung Supabase)')
+      }
+      return
+    }
     if (editingPet) {
       // Update
       const { error } = await supabase
@@ -62,6 +80,11 @@ export default function Home() {
 
   const handleDeletePet = async (pet: Pet) => {
     if (confirm(`Delete ${pet.name}? This action cannot be undone.`)) {
+      if (useMock) {
+        setPets(prev => prev.filter(p => p.id !== pet.id))
+        toast.success('Pet deleted (mode mock)')
+        return
+      }
       const { error } = await supabase.from('pets').delete().eq('id', pet.id)
       if (error) {
         toast.error('Failed to delete pet: ' + error.message)
@@ -75,6 +98,8 @@ export default function Home() {
   const handleUpdateStock = async (pet: Pet, newStock: number) => {
     // Optimistic UI update
     setPets(prev => prev.map(p => p.id === pet.id ? { ...p, stock: newStock } : p))
+    
+    if (useMock) return // In mock mode, just keep the optimistic update
     
     const { error } = await supabase
       .from('pets')
@@ -163,6 +188,13 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* Mock mode banner */}
+      {useMock && (
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-800 text-sm px-4 py-2 text-center">
+          ⚠️ Mode Demo — data lokal (26 pets). Untuk data persisten, setup Supabase di <code className="bg-amber-100 px-1 rounded">.env.local</code> lalu jalankan <code className="bg-amber-100 px-1 rounded">supabase.sql</code>.
+        </div>
+      )}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         {loading ? (
