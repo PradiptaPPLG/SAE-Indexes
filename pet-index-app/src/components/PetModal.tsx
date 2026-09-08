@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Pet, PetInsert, PetUpdate } from '@/types/pet'
-import { X } from 'lucide-react'
+import { X, Upload, CheckCircle } from 'lucide-react'
 
 interface PetModalProps {
   isOpen: boolean
@@ -27,10 +27,10 @@ export default function PetModal({ isOpen, onClose, onSave, initialData, title }
   const [category, setCategory] = useState('Cat')
   const [stock, setStock] = useState(0)
   const [imageUrl, setImageUrl] = useState('')
-  const [description, setDescription] = useState('')
   const [biomeLevel, setBiomeLevel] = useState(5)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fileName, setFileName] = useState('')
 
   useEffect(() => {
     if (isOpen) {
@@ -39,21 +39,44 @@ export default function PetModal({ isOpen, onClose, onSave, initialData, title }
         setCategory(initialData.category)
         setStock(initialData.stock)
         setImageUrl(initialData.image_url || '')
-        setDescription(initialData.description || '')
         setBiomeLevel(initialData.biome_level)
+        setFileName(initialData.image_url ? initialData.image_url.split('/').pop() || '' : '')
       } else {
         setName('')
         setCategory('Cat')
         setStock(0)
         setImageUrl('')
-        setDescription('')
         setBiomeLevel(5)
+        setFileName('')
       }
       setError('')
     }
   }, [initialData, isOpen])
 
   if (!isOpen) return null
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validasi ekstensi .webp
+    if (!file.name.toLowerCase().endsWith('.webp') && file.type !== 'image/webp') {
+      setError('Format gambar WAJIB berformat .webp!')
+      return
+    }
+
+    setError('')
+    setFileName(file.name)
+
+    // Convert file ke Data URL untuk disimpan/ditampilkan
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setImageUrl(event.target.result as string)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,7 +89,7 @@ export default function PetModal({ isOpen, onClose, onSave, initialData, title }
         category,
         stock,
         image_url: imageUrl.trim() || null,
-        description: description.trim() || null,
+        description: null,
         biome_level: biomeLevel,
       })
       onClose()
@@ -89,7 +112,7 @@ export default function PetModal({ isOpen, onClose, onSave, initialData, title }
           </button>
         </div>
 
-        {error && <p className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>}
+        {error && <p className="mb-4 text-sm font-medium text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
@@ -141,34 +164,45 @@ export default function PetModal({ isOpen, onClose, onSave, initialData, title }
             />
           </div>
 
-          {/* Image URL */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Image URL</label>
-            <input
-              type="text"
-              value={imageUrl}
-              onChange={e => setImageUrl(e.target.value)}
-              placeholder="https://..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none"
-            />
-          </div>
-
-          {/* Description */}
+          {/* Image Upload (.webp required) */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Description <span className="font-normal text-gray-400">(shown on card hover)</span>
+              Upload Foto Pet <span className="text-red-500 font-bold">(Wajib .webp)</span>
             </label>
-            <textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Fun facts, habitat info, special abilities..."
-              rows={3}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none resize-none"
-            />
+            <div className="relative border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-blue-500 transition-colors bg-gray-50/50">
+              <input
+                type="file"
+                accept=".webp,image/webp"
+                onChange={handleFileUpload}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+              />
+              <div className="flex flex-col items-center justify-center gap-1.5 pointer-events-none">
+                {fileName ? (
+                  <>
+                    <CheckCircle className="text-emerald-500" size={28} />
+                    <span className="text-sm font-medium text-gray-800 line-clamp-1">{fileName}</span>
+                    <span className="text-xs text-emerald-600 font-semibold">Format WebP Valid ✅</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="text-gray-400" size={24} />
+                    <span className="text-sm text-gray-600 font-medium">Klik untuk upload foto pet</span>
+                    <span className="text-xs text-gray-400">Hanya menerima file <code className="bg-gray-200 px-1 py-0.5 rounded text-gray-800 font-bold">.webp</code></span>
+                  </>
+                )}
+              </div>
+            </div>
+            {imageUrl && (
+              <div className="mt-2 flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={imageUrl} alt="Preview" className="w-12 h-12 rounded-lg object-cover border border-gray-200 shadow-sm" />
+                <span className="text-xs text-gray-500">Preview foto pet yang diupload</span>
+              </div>
+            )}
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-3">
             <button
               type="button"
               onClick={onClose}
@@ -180,7 +214,7 @@ export default function PetModal({ isOpen, onClose, onSave, initialData, title }
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-lg font-semibold transition-colors"
+              className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-lg font-semibold transition-colors shadow"
             >
               {loading ? 'Saving...' : initialData ? 'Save Changes' : 'Add Pet'}
             </button>
@@ -190,3 +224,4 @@ export default function PetModal({ isOpen, onClose, onSave, initialData, title }
     </div>
   )
 }
+
