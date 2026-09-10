@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { supabase } from '@/lib/supabase'
+import { databases, DATABASE_ID, COLLECTION_ID, ID, Query } from '@/lib/appwrite'
 import { Pet, PetInsert, PetUpdate } from '@/types/pet'
 import { MOCK_PETS } from '@/lib/mockPets'
 import PetCard from '@/components/PetCard'
@@ -26,22 +26,43 @@ export default function Home() {
 
   const fetchPets = async () => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('pets')
-      .select('*')
-      .order('biome_level', { ascending: true })
-      .order('name', { ascending: true })
-    
-    if (error || !data || data.length === 0) {
-      if (error) console.warn('Supabase error, using mock data:', error.message)
-      // Fallback ke mock data jika Supabase belum di-setup atau kosong
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        COLLECTION_ID,
+        [
+          Query.orderAsc('biome_level'),
+          Query.orderAsc('name'),
+          Query.limit(500),
+        ]
+      )
+
+      if (!response.documents || response.documents.length === 0) {
+        setPets(MOCK_PETS)
+        setUseMock(true)
+      } else {
+        // Remap Appwrite fields ($id, $createdAt, $updatedAt) → Pet type
+        const mapped: Pet[] = response.documents.map((doc) => ({
+          id: doc.$id,
+          name: doc.name,
+          category: doc.category,
+          stock: doc.stock,
+          image_url: doc.image_url ?? null,
+          description: doc.description ?? null,
+          biome_level: doc.biome_level,
+          created_at: doc.$createdAt,
+          updated_at: doc.$updatedAt,
+        }))
+        setPets(mapped)
+        setUseMock(false)
+      }
+    } catch (error) {
+      console.warn('Appwrite error, using mock data:', error)
       setPets(MOCK_PETS)
       setUseMock(true)
-    } else {
-      setPets(data)
-      setUseMock(false)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const handleSavePet = async (petData: PetInsert | PetUpdate) => {
@@ -59,20 +80,21 @@ export default function Home() {
     }
     if (editingPet) {
       // Update
-      const { error } = await supabase
-        .from('pets')
-        .update(petData)
-        .eq('id', editingPet.id)
-      
-      if (error) throw error
+      await databases.updateDocument(
+        DATABASE_ID,
+        COLLECTION_ID,
+        editingPet.id,
+        petData as Record<string, unknown>
+      )
       toast.success('Pet updated!')
     } else {
       // Insert
-      const { error } = await supabase
-        .from('pets')
-        .insert([petData as PetInsert])
-      
-      if (error) throw error
+      await databases.createDocument(
+        DATABASE_ID,
+        COLLECTION_ID,
+        ID.unique(),
+        petData as Record<string, unknown>
+      )
       toast.success('Pet added!')
     }
     await fetchPets()
@@ -85,12 +107,13 @@ export default function Home() {
         toast.success('Pet deleted (mode mock)')
         return
       }
-      const { error } = await supabase.from('pets').delete().eq('id', pet.id)
-      if (error) {
-        toast.error('Failed to delete pet: ' + error.message)
-      } else {
+      try {
+        await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, pet.id)
         toast.success('Pet deleted')
         await fetchPets()
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error'
+        toast.error('Failed to delete pet: ' + msg)
       }
     }
   }
@@ -101,13 +124,16 @@ export default function Home() {
     
     if (useMock) return // In mock mode, just keep the optimistic update
     
-    const { error } = await supabase
-      .from('pets')
-      .update({ stock: newStock })
-      .eq('id', pet.id)
-      
-    if (error) {
-      toast.error('Failed to update stock: ' + error.message)
+    try {
+      await databases.updateDocument(
+        DATABASE_ID,
+        COLLECTION_ID,
+        pet.id,
+        { stock: newStock }
+      )
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error'
+      toast.error('Failed to update stock: ' + msg)
       await fetchPets() // revert
     }
   }
@@ -200,7 +226,7 @@ export default function Home() {
       {useMock && (
         <div className="bg-amber-100/80 backdrop-blur-sm border-b border-amber-200/50 text-amber-900 text-xs sm:text-sm px-4 py-3 text-center font-medium shadow-inner flex items-center justify-center gap-2">
           <span className="text-lg">⚠️</span> 
-          <span>Mode Demo Aktif — Menggunakan data lokal. Setup Supabase di <code className="bg-amber-200/70 px-1.5 py-0.5 rounded-md font-mono text-xs">.env.local</code>.</span>
+          <span>Mode Demo Aktif — Menggunakan data lokal. Pastikan kredensial Appwrite di <code className="bg-amber-200/70 px-1.5 py-0.5 rounded-md font-mono text-xs">.env.local</code> sudah benar.</span>
         </div>
       )}
 
