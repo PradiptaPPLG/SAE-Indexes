@@ -341,6 +341,7 @@ export default function Home() {
                       onEdit={(p) => { setEditingPet(p); setIsModalOpen(true); }}
                       onDelete={handleDeletePet}
                       onUpdateStock={handleUpdateStock}
+                      isRiftMode={isRiftMode}
                     />
                   ))}
                 </div>
@@ -367,6 +368,7 @@ export default function Home() {
                       onEdit={(p) => { setEditingPet(p); setIsModalOpen(true); }}
                       onDelete={handleDeletePet}
                       onUpdateStock={handleUpdateStock}
+                      isRiftMode={isRiftMode}
                     />
                   ))}
                 </div>
@@ -394,6 +396,7 @@ export default function Home() {
                       onEdit={(p) => { setEditingPet(p); setIsModalOpen(true); }}
                       onDelete={handleDeletePet}
                       onUpdateStock={handleUpdateStock}
+                      isRiftMode={isRiftMode}
                     />
                   ))}
                 </div>
