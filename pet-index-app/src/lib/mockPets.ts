@@ -36,4 +36,18 @@ export const MOCK_PETS: Pet[] = [
   { id: 'k2', name: 'Gecko Kosmik', category: 'Other', stock: 5, image_url: '/pets/2-kosmik-gecko.webp', description: 'Gecko yang tubuhnya dipenuhi bintang dan nebula.', biome_level: 9, created_at: '', updated_at: '' },
   { id: 'k3', name: 'Gorila Kosmik', category: 'Other', stock: 5, image_url: '/pets/3-kosmik-gorila.webp', description: 'Gorila raksasa yang melayang-layang di vakum luar angkasa.', biome_level: 9, created_at: '', updated_at: '' },
   { id: 'k4', name: 'Saturnita', category: 'Other', stock: 5, image_url: '/pets/4-kosmik-saturnita.webp', description: 'Makhluk misterius berbentuk planet Saturnus yang penuh teka-teki.', biome_level: 9, created_at: '', updated_at: '' },
+
+  // Cherry Blossom (Lvl 10)
+  { id: 'cb1', name: 'Crane', category: 'Bird', stock: 5, image_url: '/pets/10-crane.webp', description: 'Burung bangau anggun yang menari di antara gugusan bunga sakura.', biome_level: 10, created_at: '', updated_at: '' },
+  { id: 'cb2', name: 'Koi', category: 'Fish', stock: 5, image_url: '/pets/10-koi.webp', description: 'Ikan koi legendaris yang berenang melawan arus di sungai cherry blossom.', biome_level: 10, created_at: '', updated_at: '' },
+  { id: 'cb3', name: 'Red Panda', category: 'Other', stock: 5, image_url: '/pets/10-red-panda.webp', description: 'Panda merah lucu yang bersantai di dahan pohon sakura.', biome_level: 10, created_at: '', updated_at: '' },
+  { id: 'cb4', name: 'Salamander', category: 'Other', stock: 5, image_url: '/pets/10-salamander.webp', description: 'Salamander mistis penjaga keharmonisan hutan sakura.', biome_level: 10, created_at: '', updated_at: '' },
+  { id: 'cb5', name: 'Snowy Owl', category: 'Bird', stock: 5, image_url: '/pets/10-snowy-owl.webp', description: 'Burung hantu salju bijaksana yang mengamati kelopak bunga berguguran.', biome_level: 10, created_at: '', updated_at: '' },
+
+  // Titan Temple (Lvl 11)
+  { id: 'tt1', name: 'Bladehide', category: 'Other', stock: 5, image_url: '/pets/11-bladehide.webp', description: 'Monster berlapis baja tajam pelindung kuil titan.', biome_level: 11, created_at: '', updated_at: '' },
+  { id: 'tt2', name: 'Crustacia', category: 'Other', stock: 5, image_url: '/pets/11-crustacia.webp', description: 'Kepiting raksasa purba dengan capit yang mampu menghancurkan pilar batu.', biome_level: 11, created_at: '', updated_at: '' },
+  { id: 'tt3', name: 'Mantaris', category: 'Other', stock: 5, image_url: '/pets/11-mantaris.webp', description: 'Serangga raksasa penjaga lorong gelap kuil titan.', biome_level: 11, created_at: '', updated_at: '' },
+  { id: 'tt4', name: 'Rhinotaur', category: 'Other', stock: 5, image_url: '/pets/11-rhinotaur.webp', description: 'Makhluk setengah badak setengah titan yang tak terkalahkan.', biome_level: 11, created_at: '', updated_at: '' },
+  { id: 'tt5', name: 'Spideron', category: 'Other', stock: 5, image_url: '/pets/11-spideron.webp', description: 'Laba-laba mekanik atau raksasa dari era titan kuno.', biome_level: 11, created_at: '', updated_at: '' },
 ]
