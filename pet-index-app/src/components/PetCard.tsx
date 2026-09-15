@@ -39,6 +39,16 @@ const INFO_HOVER_MAP: Record<string, string> = {
   'Gecko Kosmik': '/info/kosmik-gecko.webp',
   'Gorila Kosmik': '/info/gorila.webp',
   'Saturnita': '/info/saturnus.webp',
+  'Crane': '/info/crane.webp',
+  'Koi': '/info/koi.webp',
+  'Red Panda': '/info/red-panda.webp',
+  'Salamander': '/info/salamander.webp',
+  'Snowy Owl': '/info/snowy-owl.webp',
+  'Bladehide': '/info/bladehide.webp',
+  'Crustacia': '/info/crustacia.webp',
+  'Mantaris': '/info/mantaris.webp',
+  'Rhinotaur': '/info/rhinotaur.webp',
+  'Spideron': '/info/spideron.webp',
 }
 
 const BIOMES: Record<number, { 
@@ -82,6 +92,20 @@ const BIOMES: Record<number, {
     badgeBg: 'bg-purple-100 text-purple-900 border-purple-300',
     cardBg: 'bg-gradient-to-br from-purple-50/70 via-violet-50/40 to-fuchsia-50/50',
     cardBorder: 'border-purple-300',
+  },
+  10: { 
+    name: 'Sakura', 
+    emoji: '🌸', 
+    badgeBg: 'bg-pink-100 text-pink-900 border-pink-300',
+    cardBg: 'bg-gradient-to-br from-pink-50/70 via-rose-50/40 to-red-50/50',
+    cardBorder: 'border-pink-300',
+  },
+  11: { 
+    name: 'Kuil Titan', 
+    emoji: '🗿', 
+    badgeBg: 'bg-stone-100 text-stone-900 border-stone-300',
+    cardBg: 'bg-gradient-to-br from-stone-200/70 via-gray-100/40 to-slate-200/50',
+    cardBorder: 'border-stone-400',
   },
 }
 
