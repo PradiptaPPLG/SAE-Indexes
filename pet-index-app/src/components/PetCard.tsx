@@ -110,7 +110,7 @@ const BIOMES: Record<number, {
   },
 }
 
-export default function PetCard({ pet, onEdit, onDelete, onUpdateStock, isRiftMode = false, isFlippedAll = false }: PetCardProps) {
+export default function PetCard({ pet, onEdit, onDelete, onUpdateStock, isFlippedAll = false }: PetCardProps) {
   const isCrisis = pet.stock <= 3
   const isBoros = pet.stock > 6
   const biome = BIOMES[pet.biome_level] || { 
@@ -124,13 +124,13 @@ export default function PetCard({ pet, onEdit, onDelete, onUpdateStock, isRiftMo
   const infoHoverImage = INFO_HOVER_MAP[pet.name]
 
   const borderClass = isCrisis
-    ? `border-red-500 ring-2 ring-red-400/20 ${isRiftMode ? 'shadow-red-500/20' : 'shadow-red-100'}`
+    ? 'border-red-500 ring-2 ring-red-400/20 shadow-red-100'
     : isBoros
-    ? `border-blue-500 ring-2 ring-blue-400/20 ${isRiftMode ? 'shadow-blue-500/20' : 'shadow-blue-100'}`
-    : `${biome.cardBorder} ${isRiftMode ? 'shadow-purple-500/10' : 'shadow-gray-100'}`
+    ? 'border-blue-500 ring-2 ring-blue-400/20 shadow-blue-100'
+    : `${biome.cardBorder} shadow-gray-100`
 
   return (
-    <div className={`w-full rounded-2xl border-2 shadow-lg overflow-hidden flex flex-col ${borderClass} ${isRiftMode ? 'bg-indigo-950/40 backdrop-blur-sm' : biome.cardBg}`} style={{ height: '420px' }}>
+    <div className={`w-full rounded-2xl border-2 shadow-lg overflow-hidden flex flex-col ${borderClass} ${biome.cardBg}`} style={{ height: '420px' }}>
       
       {/* ── IMAGE SECTION WITH FLIP ON HOVER ── */}
       <div className="group perspective-1000 relative h-48 flex-shrink-0 cursor-pointer">
@@ -191,15 +191,15 @@ export default function PetCard({ pet, onEdit, onDelete, onUpdateStock, isRiftMo
       </div>
 
       {/* ── CARD BOTTOM CONTENT ── */}
-      <div className={`p-4 flex flex-col flex-grow justify-between overflow-hidden ${isRiftMode ? 'bg-indigo-950/60' : 'bg-white/40'}`}>
+      <div className="p-4 flex flex-col flex-grow justify-between overflow-hidden bg-white/40">
         <div>
-          <h3 className={`font-bold text-base leading-tight line-clamp-1 ${isRiftMode ? 'text-indigo-50' : 'text-gray-900'}`}>{pet.name}</h3>
-          <p className={`text-xs mt-0.5 ${isRiftMode ? 'text-indigo-300' : 'text-gray-600'}`}>{pet.category} · {biome.emoji} {biome.name}</p>
+          <h3 className="font-bold text-base leading-tight line-clamp-1 text-gray-900">{pet.name}</h3>
+          <p className="text-xs mt-0.5 text-gray-600">{pet.category} · {biome.emoji} {biome.name}</p>
         </div>
 
         <div className="space-y-3 pt-2">
           {/* Stock label */}
-          <div className={`text-sm font-semibold ${isCrisis ? 'text-red-500' : isBoros ? (isRiftMode ? 'text-cyan-400' : 'text-blue-600') : (isRiftMode ? 'text-indigo-200' : 'text-gray-700')}`}>
+          <div className={`text-sm font-semibold ${isCrisis ? 'text-red-500' : isBoros ? 'text-blue-600' : 'text-gray-700'}`}>
             Stock: {pet.stock}
           </div>
 
@@ -210,21 +210,13 @@ export default function PetCard({ pet, onEdit, onDelete, onUpdateStock, isRiftMo
           <div className="flex gap-2">
             <button
               onClick={() => onEdit(pet)}
-              className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg transition-colors text-xs font-medium border shadow-sm ${
-                isRiftMode 
-                  ? 'bg-indigo-900/50 hover:bg-indigo-800 text-indigo-100 border-indigo-700/50' 
-                  : 'bg-white/80 hover:bg-white text-gray-700 border-gray-200'
-              }`}
+              className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg transition-colors text-xs font-medium border shadow-sm bg-white/80 hover:bg-white text-gray-700 border-gray-200"
             >
               <Edit size={13} /> Edit
             </button>
             <button
               onClick={() => onDelete(pet)}
-              className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg transition-colors text-xs font-medium border ${
-                isRiftMode
-                  ? 'bg-red-900/30 hover:bg-red-900/50 text-red-400 border-red-900/50'
-                  : 'bg-red-50 hover:bg-red-100 text-red-600 border-red-100'
-              }`}
+              className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg transition-colors text-xs font-medium border bg-red-50 hover:bg-red-100 text-red-600 border-red-100"
             >
               <Trash2 size={13} /> Delete
             </button>
