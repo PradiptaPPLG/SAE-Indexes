@@ -10,6 +10,7 @@ interface PetCardProps {
   onDelete: (pet: Pet) => void
   onUpdateStock: (pet: Pet, newStock: number) => void
   isRiftMode?: boolean
+  isFlippedAll?: boolean
 }
 
 const INFO_HOVER_MAP: Record<string, string> = {
@@ -109,7 +110,7 @@ const BIOMES: Record<number, {
   },
 }
 
-export default function PetCard({ pet, onEdit, onDelete, onUpdateStock, isRiftMode = false }: PetCardProps) {
+export default function PetCard({ pet, onEdit, onDelete, onUpdateStock, isRiftMode = false, isFlippedAll = false }: PetCardProps) {
   const isCrisis = pet.stock <= 3
   const isBoros = pet.stock > 6
   const biome = BIOMES[pet.biome_level] || { 
@@ -152,7 +153,9 @@ export default function PetCard({ pet, onEdit, onDelete, onUpdateStock, isRiftMo
         </div>
 
         {/* 3D Flip Container for Image Area */}
-        <div className="relative w-full h-full transition-transform duration-500 transform-style-3d group-hover:rotate-y-180">
+        <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${
+          isFlippedAll ? 'rotate-y-180 group-hover:rotate-y-0' : 'group-hover:rotate-y-180'
+        }`}>
           
           {/* FRONT: Main Pet Image */}
           <div className="absolute inset-0 backface-hidden bg-gray-100 flex items-center justify-center overflow-hidden">

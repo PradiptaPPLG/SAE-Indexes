@@ -6,7 +6,7 @@ import { Pet, PetInsert, PetUpdate } from '@/types/pet'
 import { MOCK_PETS } from '@/lib/mockPets'
 import PetCard from '@/components/PetCard'
 import PetModal from '@/components/PetModal'
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search, RotateCcw } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 
 export default function Home() {
@@ -16,6 +16,7 @@ export default function Home() {
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [useMock, setUseMock] = useState(false)
   const [isRiftMode, setIsRiftMode] = useState(false)
+  const [isFlippedAll, setIsFlippedAll] = useState(false)
   
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingPet, setEditingPet] = useState<Pet | undefined>(undefined)
@@ -137,6 +138,33 @@ export default function Home() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error'
       toast.error('Failed to update stock: ' + msg)
+      await fetchPets() // revert
+    }
+  }
+
+  const handleResetAllStock = async () => {
+    if (!confirm('Apakah Anda yakin ingin mengosongkan (set 0) semua stok pet? Kartu pet TIDAK akan dihapus.')) return
+    
+    // Optimistic UI update
+    setPets(prev => prev.map(p => ({ ...p, stock: 0 })))
+    toast.success('Semua stok pet berhasil dikosongkan (0)!')
+
+    if (useMock) return
+
+    try {
+      await Promise.all(
+        pets.map(pet =>
+          databases.updateDocument(
+            DATABASE_ID,
+            COLLECTION_ID,
+            pet.id,
+            { stock: 0 }
+          )
+        )
+      )
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error'
+      toast.error('Gagal mengosongkan stok di database: ' + msg)
       await fetchPets() // revert
     }
   }
@@ -268,6 +296,34 @@ export default function Home() {
               </button>
 
               <button
+                onClick={() => setIsFlippedAll(!isFlippedAll)}
+                className={`flex items-center gap-2 py-2.5 px-4 rounded-xl font-bold shadow-lg transition-all transform hover:-translate-y-0.5 ${
+                  isFlippedAll
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-amber-500/30'
+                    : isRiftMode
+                    ? 'bg-purple-900/40 hover:bg-purple-800/60 text-purple-100 border border-purple-500/30'
+                    : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
+                }`}
+                title="Flip all pet cards to info / back side"
+              >
+                <span className="text-lg leading-none">🥚</span>
+                <span className="hidden sm:inline tracking-wide">{isFlippedAll ? 'Flip to Pet' : 'Flip to Egg'}</span>
+              </button>
+
+              <button
+                onClick={handleResetAllStock}
+                className={`flex items-center gap-2 py-2.5 px-4 rounded-xl font-bold shadow-lg transition-all transform hover:-translate-y-0.5 ${
+                  isRiftMode
+                    ? 'bg-red-950/60 hover:bg-red-900/80 text-red-300 border border-red-500/30'
+                    : 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200'
+                }`}
+                title="Kosongkan (set 0) stok semua pet tanpa menghapus kartunya"
+              >
+                <RotateCcw size={16} />
+                <span className="hidden sm:inline tracking-wide">Empty All Stock</span>
+              </button>
+
+              <button
                 onClick={() => { setEditingPet(undefined); setIsModalOpen(true); }}
                 className={`flex items-center gap-2 py-2.5 px-4 sm:px-5 rounded-xl font-bold shadow-lg transition-all transform hover:-translate-y-0.5 ${
                   isRiftMode
@@ -342,6 +398,7 @@ export default function Home() {
                       onDelete={handleDeletePet}
                       onUpdateStock={handleUpdateStock}
                       isRiftMode={isRiftMode}
+                      isFlippedAll={isFlippedAll}
                     />
                   ))}
                 </div>
@@ -369,6 +426,7 @@ export default function Home() {
                       onDelete={handleDeletePet}
                       onUpdateStock={handleUpdateStock}
                       isRiftMode={isRiftMode}
+                      isFlippedAll={isFlippedAll}
                     />
                   ))}
                 </div>
@@ -397,6 +455,7 @@ export default function Home() {
                       onDelete={handleDeletePet}
                       onUpdateStock={handleUpdateStock}
                       isRiftMode={isRiftMode}
+                      isFlippedAll={isFlippedAll}
                     />
                   ))}
                 </div>
